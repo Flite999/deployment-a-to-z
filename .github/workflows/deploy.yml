@@ -19,7 +19,7 @@ jobs:
       REACT_APP_API_HOSTNAME: localhost
       DB_USER: ${{ secrets.DB_USERNAME }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      DB_HOST: localhost
+      DB_HOST: host_will_be_populated_after_github_actions_run
       DB_NAME: a_to_z_deployment
       DB_PORT: 5432
       API_PORT: 3001
