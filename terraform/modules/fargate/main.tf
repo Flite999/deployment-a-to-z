@@ -107,11 +107,11 @@ variable "security_groups" {
 }
 
 output "frontend_dns_name" {
-  value = [for lb in aws_ecs_service.frontend.load_balancer : lb.dns_name][0]
+  value = aws_ecs_service.frontend.load_balancer.dns_name
 }
 
 output "backend_dns_name" {
-  value = [for lb in aws_ecs_service.backend.load_balancer : lb.dns_name][0]
+  value = aws_ecs_service.backend.load_balancer.dns_name
 }
 
 variable "vpc_id" {
