@@ -1,0 +1,102 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: us-east-1
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REACT_APP_YOUR_NAME: your_name
+      REACT_APP_API_PORT: 3001
+      REACT_APP_API_HOSTNAME: localhost
+      DB_USER: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_HOST: host_will_be_populated_after_github_actions_run
+      DB_NAME: a_to_z_deployment
+      DB_PORT: 5432
+      API_PORT: 3001
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm install
+          cd ../backend
+          npm install
+  
+      - name: Run frontend unit tests
+        run: |
+          cd frontend
+          npm run test
+  
+      - name: Run backend unit tests
+        run: |
+          cd backend
+          npm run test
+      
+      - name: Build and push frontend Docker image
+        run: |
+          cd frontend
+          docker build -t ghcr.io/${{ github.repository }}/frontend:latest .
+          docker push ghcr.io/${{ github.repository }}/frontend:latest
+
+      - name: Build and push backend Docker image
+        run: |
+          cd backend
+          docker build -t ghcr.io/${{ github.repository }}/backend:latest .
+          docker push ghcr.io/${{ github.repository }}/backend:latest
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.0.11
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: terraform
+
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -auto-approve -var "db_username=${{ secrets.DB_USERNAME }}" -var "db_password=${{ secrets.DB_PASSWORD }}"
+        working-directory: terraform
+
+      - name: Extract Terraform Outputs
+        id: extract_outputs
+        run: |
+          echo "::set-output name=backend_record::$(jq -r '.outputs.backend_record.value' plan.json)"
+          echo "::set-output name=db_endpoint::$(jq -r '.outputs.db_endpoint.value' plan.json)"
+        working-directory: terraform
+      
+      - name: Update backend .env file
+        run: |
+          echo "DB_HOST=${{ steps.extract_outputs.outputs.db_endpoint }}" >> backend/.env
+        env:
+          db_endpoint: ${{ steps.extract_outputs.outputs.db_endpoint }}
+      
+      - name: Update frontend .env file
+        run: |
+          echo "REACT_APP_API_HOSTNAME=${{ steps.extract_outputs.outputs.backend_record }}" >> frontend/.env
