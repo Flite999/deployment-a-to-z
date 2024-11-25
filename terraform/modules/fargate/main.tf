@@ -57,6 +57,12 @@ resource "aws_ecs_service" "frontend" {
     subnets         = var.subnets
     security_groups = var.security_groups
   }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.frontend.arn
+    container_name   = "frontend"
+    container_port   = 3000
+  }
 }
 
 resource "aws_ecs_service" "backend" {
@@ -69,6 +75,12 @@ resource "aws_ecs_service" "backend" {
   network_configuration {
     subnets         = var.subnets
     security_groups = var.security_groups
+  }
+
+  load_balancer {
+    target_group_arn = aws_lb_target_group.backend.arn
+    container_name   = "backend"
+    container_port   = 3001
   }
 }
 
