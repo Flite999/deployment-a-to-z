@@ -2,6 +2,44 @@ resource "aws_ecs_cluster" "default" {
   name = "a-to-z-cluster"
 }
 
+resource "aws_lb" "frontend" {
+  name               = "frontend-lb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = var.security_groups
+  subnets            = var.subnets
+}
+
+resource "aws_lb" "backend" {
+  name               = "backend-lb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = var.security_groups
+  subnets            = var.subnets
+}
+
+resource "aws_lb_listener" "frontend" {
+  load_balancer_arn = aws_lb.frontend.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.frontend.arn
+  }
+}
+
+resource "aws_lb_listener" "backend" {
+  load_balancer_arn = aws_lb.backend.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.backend.arn
+  }
+}
+
 resource "aws_ecs_task_definition" "frontend" {
   family                   = "frontend"
   network_mode             = "awsvpc"
@@ -75,7 +113,7 @@ resource "aws_ecs_service" "frontend" {
   load_balancer {
     target_group_arn = aws_lb_target_group.frontend.arn
     container_name   = "frontend"
-    container_port   = 3000
+    container_port   = 80
   }
 }
 
@@ -94,7 +132,7 @@ resource "aws_ecs_service" "backend" {
   load_balancer {
     target_group_arn = aws_lb_target_group.backend.arn
     container_name   = "backend"
-    container_port   = 3001
+    container_port   = 80
   }
 }
 
@@ -107,11 +145,11 @@ variable "security_groups" {
 }
 
 output "frontend_dns_name" {
-  value = aws_ecs_service.frontend.load_balancer.dns_name
+  value = aws_lb.frontend.dns_name
 }
 
 output "backend_dns_name" {
-  value = aws_ecs_service.backend.load_balancer.dns_name
+  value = aws_lb.backend.dns_name
 }
 
 variable "vpc_id" {
