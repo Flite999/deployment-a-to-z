@@ -17,7 +17,7 @@ resource "aws_ecs_task_definition" "frontend" {
       portMappings = [
         {
           containerPort = 80
-          hostPort      = 3000
+          hostPort      = 80
         }
       ]
     }
@@ -39,7 +39,7 @@ resource "aws_ecs_task_definition" "backend" {
       portMappings = [
         {
           containerPort = 80
-          hostPort      = 3001
+          hostPort      = 80
         }
       ]
     }
