@@ -2,6 +2,50 @@ resource "aws_ecs_cluster" "default" {
   name = "a-to-z-cluster"
 }
 
+resource "aws_ecs_task_definition" "frontend" {
+  family                   = "frontend"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "256"
+  memory                   = "512"
+
+  container_definitions = jsonencode([
+    {
+      name      = "frontend"
+      image     = "frontend:latest"
+      essential = true
+      portMappings = [
+        {
+          containerPort = 80
+          hostPort      = 3000
+        }
+      ]
+    }
+  ])
+}
+
+resource "aws_ecs_task_definition" "backend" {
+  family                   = "backend"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "256"
+  memory                   = "512"
+
+  container_definitions = jsonencode([
+    {
+      name      = "backend"
+      image     = "backend:latest"
+      essential = true
+      portMappings = [
+        {
+          containerPort = 80
+          hostPort      = 3001
+        }
+      ]
+    }
+  ])
+}
+
 resource "aws_lb" "frontend" {
   name               = "frontend-lb"
   internal           = false
@@ -38,50 +82,6 @@ resource "aws_lb_listener" "backend" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.backend.arn
   }
-}
-
-resource "aws_ecs_task_definition" "frontend" {
-  family                   = "frontend"
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-  cpu                      = "256"
-  memory                   = "512"
-
-  container_definitions = jsonencode([
-    {
-      name      = "frontend"
-      image     = "frontend:latest"
-      essential = true
-      portMappings = [
-        {
-          containerPort = 3000
-          hostPort      = 3000
-        }
-      ]
-    }
-  ])
-}
-
-resource "aws_ecs_task_definition" "backend" {
-  family                   = "backend"
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-  cpu                      = "256"
-  memory                   = "512"
-
-  container_definitions = jsonencode([
-    {
-      name      = "backend"
-      image     = "backend:latest"
-      essential = true
-      portMappings = [
-        {
-          containerPort = 3001
-          hostPort      = 3001
-        }
-      ]
-    }
-  ])
 }
 
 resource "aws_lb_target_group" "frontend" {
