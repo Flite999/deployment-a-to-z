@@ -90,15 +90,18 @@ jobs:
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
     
     steps:
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # - name: Set up Node.js
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: '20'
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_wrapper: false
+        # with:
+        #   terraform_wrapper: false
       
       - name: Terraform Init
         run: terraform init
