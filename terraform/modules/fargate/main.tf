@@ -81,9 +81,9 @@ variable "security_groups" {
 }
 
 output "frontend_dns_name" {
-  value = aws_ecs_service.frontend.load_balancer[0].dns_name
+  value = [for lb in aws_ecs_service.frontend.load_balancer : lb.dns_name][0]
 }
 
 output "backend_dns_name" {
-  value = aws_ecs_service.backend.load_balancer[0].dns_name
+  value = [for lb in aws_ecs_service.backend.load_balancer : lb.dns_name][0]
 }

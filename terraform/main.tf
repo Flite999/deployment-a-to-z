@@ -14,9 +14,9 @@ module "fargate" {
   subnets         = ["subnet-0cb91e2ba609fa499", "subnet-03fd53ca984362ebd"]
 }
 
-module "route53" {
-  source = "./modules/route53"
-}
+# module "route53" {
+#   source = "./modules/route53"
+# }
 
 module "sns" {
   source = "./modules/sns"
