@@ -46,6 +46,20 @@ resource "aws_ecs_task_definition" "backend" {
   ])
 }
 
+resource "aws_lb_target_group" "frontend" {
+  name     = "frontend-tg"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = var.vpc_id
+}
+
+resource "aws_lb_target_group" "backend" {
+  name     = "backend-tg"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = var.vpc_id
+}
+
 resource "aws_ecs_service" "frontend" {
   name            = "frontend-service"
   cluster         = aws_ecs_cluster.default.id
@@ -98,4 +112,9 @@ output "frontend_dns_name" {
 
 output "backend_dns_name" {
   value = [for lb in aws_ecs_service.backend.load_balancer : lb.dns_name][0]
+}
+
+variable "vpc_id" {
+  description = "vpc ID for load balancers"
+  type        = string
 }
