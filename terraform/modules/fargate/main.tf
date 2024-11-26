@@ -89,6 +89,7 @@ resource "aws_lb_target_group" "frontend" {
   port     = 80
   protocol = "HTTP"
   vpc_id   = var.vpc_id
+  target_type = "ip"
 }
 
 resource "aws_lb_target_group" "backend" {
@@ -96,6 +97,7 @@ resource "aws_lb_target_group" "backend" {
   port     = 80
   protocol = "HTTP"
   vpc_id   = var.vpc_id
+  target_type = "ip"
 }
 
 resource "aws_ecs_service" "frontend" {
