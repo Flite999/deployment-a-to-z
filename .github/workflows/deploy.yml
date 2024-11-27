@@ -101,7 +101,7 @@ jobs:
         working-directory: terraform
 
       - name: Terraform Refresh
-        run: terraform refresh
+        run: terraform refresh -var "db_username=${{ secrets.DB_USERNAME }}" -var "db_password=${{ secrets.DB_PASSWORD }}"
         working-directory: terraform
 
       - name: Terraform Apply
