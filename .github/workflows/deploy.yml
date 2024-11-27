@@ -109,6 +109,7 @@ jobs:
         id: extract_outputs
         run: |
           terraform output -json > outputs.json
+          cat outputs.json
           echo "::set-output name=outputs::$(cat outputs.json)"
         working-directory: terraform
       
