@@ -108,9 +108,10 @@ jobs:
       - name: Extract Terraform Outputs
         id: extract_outputs
         run: |
-          echo "${{ steps.apply.outputs }}"
-          echo "name=backend_record=$(jq -r '.outputs.backend_record.value')" >> $GITHUB_OUTPUT
-          echo "name=db_endpoint=$(jq -r '.outputs.db_endpoint.value')" >> $GITHUB_OUTPUT
+          jq -r '.outputs.backend_record.value' terraform/terraform.tfstate > backend_record.txt
+          jq -r '.outputs.db_endpoint.value' terraform/terraform.tfstate > db_endpoint.txt
+          echo "name=backend_record=$(cat backend_record.txt)" >> $GITHUB_OUTPUT
+          echo "name=db_endpoint=$(cat db_endpoint.txt)" >> $GITHUB_OUTPUT
         working-directory: terraform
       
       - name: Update backend .env file
