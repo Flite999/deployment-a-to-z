@@ -3,6 +3,7 @@ resource "aws_db_instance" "default" {
   engine               = "postgres"
   engine_version       = "14.15"
   instance_class       = "db.t3.micro"
+  identifier           = "a-to-z-deployment"
   db_name              = var.db_name
   username             = var.db_username
   password             = var.db_password

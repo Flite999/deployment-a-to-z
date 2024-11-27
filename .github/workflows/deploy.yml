@@ -100,33 +100,58 @@ jobs:
         run: terraform init
         working-directory: terraform
 
-      - name: Terraform Refresh
-        run: terraform refresh -var "db_username=${{ secrets.DB_USERNAME }}" -var "db_password=${{ secrets.DB_PASSWORD }}"
-        working-directory: terraform
+      # - name: Terraform Refresh
+      #   run: terraform refresh -var "db_username=${{ secrets.DB_USERNAME }}" -var "db_password=${{ secrets.DB_PASSWORD }}"
+      #   working-directory: terraform
 
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve -var "db_username=${{ secrets.DB_USERNAME }}" -var "db_password=${{ secrets.DB_PASSWORD }}"
         working-directory: terraform
 
-      - name: Extract Terraform Outputs
-        id: extract_outputs
-        run: |
-          terraform output -json > outputs.json
-          echo "cat start"
-          cat outputs.json
-          echo "cat end"
-          echo "backend_record=$(jq -r '.backend_record.value' outputs.json)" >> $GITHUB_OUTPUT
-          echo "db_endpoint=$(jq -r '.db_endpoint.value' outputs.json)" >> $GITHUB_OUTPUT
-        working-directory: terraform
+      # - name: Extract Terraform Outputs
+      #   id: extract_outputs
+      #   run: |
+      #     terraform output -json > outputs.json
+      #     echo "cat start"
+      #     cat outputs.json
+      #     echo "cat end"
+      #     echo "backend_record=$(jq -r '.backend_record.value' outputs.json)" >> $GITHUB_OUTPUT
+      #     echo "db_endpoint=$(jq -r '.db_endpoint.value' outputs.json)" >> $GITHUB_OUTPUT
+      #   working-directory: terraform
       
+      # - name: Update backend .env file
+      #   run: |
+      #     echo "$GITHUB_OUTPUT"
+      #     echo "DB_HOST=${{ steps.extract_outputs.outputs.db_endpoint }}" >> backend/.env
+      #   env:
+      #     db_endpoint: ${{ steps.extract_outputs.outputs.db_endpoint }}
+      
+      # - name: Update frontend .env file
+      #   run: |
+      #     echo "REACT_APP_API_HOSTNAME=${{ steps.extract_outputs.outputs.backend_record }}" >> frontend/.env
+
+      - name: Retrieve DB Endpoint
+        id: get_db_endpoint
+        run: |
+          DB_ENDPOINT=$(aws rds describe-db-instances --db-instance-identifier a-to-z-deployment --query 'DBInstances[0].Endpoint.Address' --output text)
+          echo "DB_ENDPOINT=$DB_ENDPOINT" >> $GITHUB_ENV
+
+      - name: Retrieve Backend DNS Name
+        id: get_backend_dns
+        run: |
+          BACKEND_DNS=$(aws elbv2 describe-load-balancers --names backend-lb --query 'LoadBalancers[0].DNSName' --output text)
+          echo "BACKEND_DNS=$BACKEND_DNS" >> $GITHUB_ENV
+
       - name: Update backend .env file
         run: |
-          echo "$GITHUB_OUTPUT"
-          echo "DB_HOST=${{ steps.extract_outputs.outputs.db_endpoint }}" >> backend/.env
+          echo "DB_HOST=${{ env.DB_ENDPOINT }}" >> backend/.env
         env:
-          db_endpoint: ${{ steps.extract_outputs.outputs.db_endpoint }}
+          DB_ENDPOINT: ${{ env.DB_ENDPOINT }}
       
       - name: Update frontend .env file
         run: |
-          echo "REACT_APP_API_HOSTNAME=${{ steps.extract_outputs.outputs.backend_record }}" >> frontend/.env
+          echo "REACT_APP_API_HOSTNAME=${{ env.BACKEND_DNS }}" >> frontend/.env
+          echo "REACT_APP_API_PORT=3001" >> frontend/.env
+        env:
+          BACKEND_DNS: ${{ env.BACKEND_DNS }}
