@@ -108,7 +108,7 @@ jobs:
       - name: Extract Terraform Outputs
         id: extract_outputs
         run: |
-          echo ".outputs.backend_record.value"
+          echo "${{ steps.apply.outputs }}"
           echo "name=backend_record=$(jq -r '.outputs.backend_record.value')" >> $GITHUB_OUTPUT
           echo "name=db_endpoint=$(jq -r '.outputs.db_endpoint.value')" >> $GITHUB_OUTPUT
         working-directory: terraform
