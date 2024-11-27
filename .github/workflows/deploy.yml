@@ -108,10 +108,8 @@ jobs:
       - name: Extract Terraform Outputs
         id: extract_outputs
         run: |
-          jq -r '.outputs.backend_record.value' ${{ steps.apply.outputs }} > backend_record.txt
-          jq -r '.outputs.db_endpoint.value' ${{ steps.apply.outputs }} > db_endpoint.txt
-          echo "name=backend_record=$(cat backend_record.txt)" >> $GITHUB_OUTPUT
-          echo "name=db_endpoint=$(cat db_endpoint.txt)" >> $GITHUB_OUTPUT
+          terraform output -json > outputs.json
+          echo "::set-output name=outputs::$(cat outputs.json)"
         working-directory: terraform
       
       - name: Update backend .env file
