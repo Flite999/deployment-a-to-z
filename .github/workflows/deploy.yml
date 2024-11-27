@@ -114,6 +114,7 @@ jobs:
       
       - name: Update backend .env file
         run: |
+          echo GITHUB_OUTPUT
           echo "DB_HOST=${{ steps.extract_outputs.outputs.db_endpoint }}" >> backend/.env
         env:
           db_endpoint: ${{ steps.extract_outputs.outputs.db_endpoint }}
