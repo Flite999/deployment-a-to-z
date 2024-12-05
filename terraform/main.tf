@@ -33,3 +33,11 @@ module "fargate" {
 module "sns" {
   source = "./modules/sns"
 }
+
+output "backend_record" {
+  value = module.fargate.backend_dns_name
+}
+
+output "db_endpoint" {
+  value = module.rds.db_endpoint
+}
