@@ -12,7 +12,7 @@ resource "aws_ecs_task_definition" "frontend" {
   container_definitions = jsonencode([
     {
       name      = "frontend"
-      image     = "frontend:latest"
+      image     = "ghcr.io/flite999/frontend:latest"
       essential = true
       portMappings = [
         {
@@ -34,7 +34,7 @@ resource "aws_ecs_task_definition" "backend" {
   container_definitions = jsonencode([
     {
       name      = "backend"
-      image     = "backend:latest"
+      image     = "ghcr.io/flite999/backend:latest"
       essential = true
       portMappings = [
         {

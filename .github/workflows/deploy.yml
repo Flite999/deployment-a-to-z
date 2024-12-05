@@ -100,10 +100,6 @@ jobs:
         run: terraform init
         working-directory: terraform
 
-      # - name: Terraform Refresh
-      #   run: terraform refresh -var "db_username=${{ secrets.DB_USERNAME }}" -var "db_password=${{ secrets.DB_PASSWORD }}"
-      #   working-directory: terraform
-
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve -var "db_username=${{ secrets.DB_USERNAME }}" -var "db_password=${{ secrets.DB_PASSWORD }}"
