@@ -13,6 +13,9 @@ resource "aws_ecs_task_definition" "frontend" {
     {
       name      = "frontend"
       image     = "ghcr.io/flite999/frontend:latest"
+      repositoryCredentials = {
+        credentialsParameter = "arn:aws:secretsmanager:us-east-1:183631321835:secret:ecr-pullthroughcache/fliteghcr-uMHtjJ"
+      }
       essential = true
       portMappings = [
         {
@@ -35,6 +38,9 @@ resource "aws_ecs_task_definition" "backend" {
     {
       name      = "backend"
       image     = "ghcr.io/flite999/backend:latest"
+      repositoryCredentials = {
+        credentialsParameter = "arn:aws:secretsmanager:us-east-1:183631321835:secret:ecr-pullthroughcache/fliteghcr-uMHtjJ"
+      }
       essential = true
       portMappings = [
         {
