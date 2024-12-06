@@ -1,3 +1,9 @@
+
+module "iam" {
+  source = "./modules/iam"
+}
+
+
 resource "aws_ecs_cluster" "default" {
   name = "a-to-z-cluster"
 }
@@ -8,11 +14,12 @@ resource "aws_ecs_task_definition" "frontend" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
   memory                   = "512"
+  execution_role_arn       = module.iam.ecs_task_execution_role_arn
 
   container_definitions = jsonencode([
     {
-      name      = "frontend"
-      image     = "ghcr.io/flite999/frontend:latest"
+      name  = "frontend"
+      image = "ghcr.io/flite999/frontend:latest"
       repositoryCredentials = {
         credentialsParameter = "arn:aws:secretsmanager:us-east-1:183631321835:secret:ecr-pullthroughcache/fliteghcr-uMHtjJ"
       }
@@ -33,11 +40,12 @@ resource "aws_ecs_task_definition" "backend" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
   memory                   = "512"
+  execution_role_arn       = module.iam.ecs_task_execution_role_arn
 
   container_definitions = jsonencode([
     {
-      name      = "backend"
-      image     = "ghcr.io/flite999/backend:latest"
+      name  = "backend"
+      image = "ghcr.io/flite999/backend:latest"
       repositoryCredentials = {
         credentialsParameter = "arn:aws:secretsmanager:us-east-1:183631321835:secret:ecr-pullthroughcache/fliteghcr-uMHtjJ"
       }
@@ -91,18 +99,18 @@ resource "aws_lb_listener" "backend" {
 }
 
 resource "aws_lb_target_group" "frontend" {
-  name     = "frontend-tg"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = var.vpc_id
+  name        = "frontend-tg"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = var.vpc_id
   target_type = "ip"
 }
 
 resource "aws_lb_target_group" "backend" {
-  name     = "backend-tg"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = var.vpc_id
+  name        = "backend-tg"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = var.vpc_id
   target_type = "ip"
 }
 
